@@ -64,3 +64,25 @@ coverage/
 
 bin/
 dist/
+
+*.pem
+*.key
+*.pub
+*.cert
+*.crt
+*.pfx
+*.p12
+*.asc
+
+*.xlsx
+*.xls
+*.xls#
+*.xlsm
+*.xlsb
+*.xltx
+*.csv
+*.ods
+*.ots
+*.odt
+*.ott
+.~lock.*
