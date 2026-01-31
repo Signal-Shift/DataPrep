@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 import java.util.Optional;
 
 @Slf4j
-public class EmployeeRowParser {
+public class RowParser {
 
     private static final int REQUIRED_CELLS = 7;
 
@@ -25,7 +25,7 @@ public class EmployeeRowParser {
         }
 
         try {
-            var employee = buildEmployeeFromRow(row, formatter);
+            var employee = buildRecordFromRow(row, formatter);
 
             if (isValidEmployee(employee)) {
                 log.info("Successfully parsed row {}: {} - {}",
@@ -42,11 +42,7 @@ public class EmployeeRowParser {
         }
     }
 
-    private Employee buildEmployeeFromRow(Row row, DataFormatter formatter) {
-        var id = extractCellValue(row, 0, formatter);
-        var name = extractCellValue(row, 1, formatter);
-
-        log.trace("Row {}: id='{}', name='{}'", row.getRowNum(), id, name);
+    private Employee buildRecordFromRow(Row row, DataFormatter formatter) {
 
         return new Employee(
                 extractCellValue(row, 0, formatter),

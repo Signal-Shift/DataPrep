@@ -1,9 +1,6 @@
 package com.originspecs.specextractor.processor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.originspecs.specextractor.model.Employee;
 import com.originspecs.specextractor.writer.JsonFileWriter;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -15,15 +12,15 @@ import java.util.List;
 @Slf4j
 public class DataProcessor {
 
-    private final EmployeeRowParser rowParser;
+    private final RowParser rowParser;
     private final JsonFileWriter jsonWriter;
 
     public DataProcessor(){
-        this.rowParser = new EmployeeRowParser();
+        this.rowParser = new RowParser();
         this.jsonWriter = new JsonFileWriter();
     }
 
-    public DataProcessor(EmployeeRowParser rowParser, JsonFileWriter jsonWriter){
+    public DataProcessor(RowParser rowParser, JsonFileWriter jsonWriter){
         this.rowParser = rowParser;
         this.jsonWriter = jsonWriter;
     }
