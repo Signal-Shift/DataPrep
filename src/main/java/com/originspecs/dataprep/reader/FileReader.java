@@ -1,8 +1,8 @@
-package com.originspecs.specextractor.reader;
+package com.originspecs.dataprep.reader;
 
-import com.originspecs.specextractor.model.DataRecord;
-import com.originspecs.specextractor.processor.PreProcessor;
-import com.originspecs.specextractor.processor.RowParser;
+import com.originspecs.dataprep.model.DataRecord;
+import com.originspecs.dataprep.processor.PreProcessor;
+import com.originspecs.dataprep.processor.RowParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.DataFormatter;

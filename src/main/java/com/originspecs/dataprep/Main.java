@@ -1,12 +1,11 @@
-package com.originspecs.specextractor;
+package com.originspecs.dataprep;
 
-import com.originspecs.specextractor.model.Employee;
-import com.originspecs.specextractor.model.Vehicle;
-import com.originspecs.specextractor.processor.DataProcessor;
-import com.originspecs.specextractor.processor.RecordBuilder;
-import com.originspecs.specextractor.processor.RowParser;
-import com.originspecs.specextractor.reader.FileReader;
-import com.originspecs.specextractor.writer.JsonFileWriter;
+import com.originspecs.dataprep.model.Vehicle;
+import com.originspecs.dataprep.processor.DataProcessor;
+import com.originspecs.dataprep.processor.RecordBuilder;
+import com.originspecs.dataprep.processor.RowParser;
+import com.originspecs.dataprep.reader.FileReader;
+import com.originspecs.dataprep.writer.JsonFileWriter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
@@ -16,7 +15,6 @@ import java.util.List;
 public class Main {
 
     public enum RecordType {
-        EMPLOYEE,
         VEHICLE
     }
 
@@ -25,12 +23,10 @@ public class Main {
 
         if (args.length < 4) {
             log.error("Insufficient arguments. Expected at least 4, got {}", args.length);
-            log.info("Usage: java -jar spec-extractor.jar <recordType> <inputFile.xls> <outputFile.json> <requiredCells> [columnThreshold]");
-            log.info("Record types: EMPLOYEE, VEHICLE");
+            log.info("Usage: java -jar DataPrep.jar <recordType> <inputFile.xls> <outputFile.json> <requiredCells> [columnThreshold]");
             log.info("columnThreshold: Optional, default 0.1 (10% minimum fill to keep column)");
             log.info("Example:");
-            log.info("java -jar target/spec-extractor.jar VEHICLE nissan.xls output.json 20");
-            log.info("java -jar target/spec-extractor.jar EMPLOYEE staff.xls employees.json 7 0.05");
+            log.info("java -jar target/DataPrep.jar VEHICLE nissan.xls output.json 20");
             System.exit(1);
         }
 
@@ -61,49 +57,18 @@ public class Main {
 
             // Process based on record type
             switch (recordType) {
-                case EMPLOYEE -> processEmployee(inputFile, outputFile, requiredCells, columnThreshold);
                 case VEHICLE -> processVehicle(inputFile, outputFile, requiredCells, columnThreshold);
             }
 
             log.info("Processing completed successfully");
 
         } catch (IllegalArgumentException e) {
-            log.error("Invalid record type. Must be EMPLOYEE or VEHICLE");
+            log.error("Invalid record type. Must be VEHICLE");
             System.exit(1);
         } catch (Exception e) {
             log.error("Failed to process files", e);
             System.exit(1);
         }
-    }
-
-    private static void processEmployee(String inputFile, String outputFile,
-                                        int requiredCells, double columnThreshold) throws Exception {
-        // Create parser
-        RowParser<Employee> employeeParser = new RowParser<>(
-                requiredCells,
-                RecordBuilder.employeeBuilder,
-                RecordBuilder.employeeValidator
-        );
-
-        // Create reader with threshold
-        FileReader<Employee> fileReader = new FileReader<>(employeeParser, columnThreshold);
-
-        // Read data
-        List<Employee> employees = fileReader.readXls(inputFile);
-
-        if (employees.isEmpty()) {
-            log.warn("No employees were parsed from the XLS file");
-            return;
-        }
-
-        // Write to JSON
-        JsonFileWriter<Employee> jsonWriter = new JsonFileWriter<>();
-        jsonWriter.write(employees, Path.of(outputFile));
-
-        // DataProcessor is now optional - you could remove it entirely
-        // Or keep it for other processing if needed
-        DataProcessor<Employee> processor = new DataProcessor<>(employeeParser, jsonWriter);
-        log.info("Processed {} employee records", employees.size());
     }
 
     private static void processVehicle(String inputFile, String outputFile,

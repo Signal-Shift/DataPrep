@@ -1,9 +1,7 @@
-package com.originspecs.specextractor.processor;
+package com.originspecs.dataprep.processor;
 
-import com.originspecs.specextractor.model.DataRecord;
-import com.originspecs.specextractor.model.Vehicle;
-import com.originspecs.specextractor.reader.FileReader;
-import com.originspecs.specextractor.writer.JsonFileWriter;
+import com.originspecs.dataprep.model.DataRecord;
+import com.originspecs.dataprep.writer.JsonFileWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;

@@ -1,4 +1,4 @@
-package com.originspecs.specextractor.config;
+package com.originspecs.dataprep.config;
 
 import lombok.extern.slf4j.Slf4j;
 

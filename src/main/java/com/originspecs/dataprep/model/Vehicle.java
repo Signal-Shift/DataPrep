@@ -1,4 +1,4 @@
-package com.originspecs.specextractor.model;
+package com.originspecs.dataprep.model;
 
 public record Vehicle(
         String manufacturer,
