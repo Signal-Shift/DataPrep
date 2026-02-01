@@ -1,4 +1,4 @@
-package com.originspecs.specextractor.processor;
+package com.originspecs.dataprep.processor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;

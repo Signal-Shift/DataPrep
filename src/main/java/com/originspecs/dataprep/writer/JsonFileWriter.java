@@ -1,9 +1,8 @@
-package com.originspecs.specextractor.writer;
+package com.originspecs.dataprep.writer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.originspecs.specextractor.model.Employee;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -18,7 +17,7 @@ public class JsonFileWriter <T> {
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     public void write(List<T> records, Path outputPath) throws IOException {
-        log.debug("Writing {} employees to JSON file", records.size());
+        log.debug("Writing {} records to JSON file", records.size());
         log.debug("Output path: {}", outputPath.toAbsolutePath());
 
         // Check if output directory exists and is writable

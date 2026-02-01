@@ -1,32 +1,16 @@
-package com.originspecs.specextractor.processor;
+package com.originspecs.dataprep.processor;
 
-import com.originspecs.specextractor.model.Employee;
-import com.originspecs.specextractor.model.Vehicle;
+import com.originspecs.dataprep.model.Vehicle;
 
 import java.util.List;
 import java.util.function.Function;
 
 public class RecordBuilder {
 
-    public static RowParser.Validator<Employee> employeeValidator = employee ->
-            employee.id() != null && !employee.id().isBlank() &&
-                    employee.name() != null && !employee.name().isBlank();
 
     public static RowParser.Validator<Vehicle> vehicleValidator = vehicle ->
             vehicle.engineModel() != null && !vehicle.engineModel().isBlank() &&
                     vehicle.modelNumber() != null && !vehicle.modelNumber().isBlank();
-
-    // Now takes List<String> of cell values
-    public static Function<List<String>, Employee> employeeBuilder = cellValues ->
-            new Employee(
-                    getValue(cellValues, 0),
-                    getValue(cellValues, 1),
-                    getValue(cellValues, 2),
-                    getValue(cellValues, 3),
-                    getValue(cellValues, 4),
-                    getValue(cellValues, 5),
-                    getValue(cellValues, 6)
-            );
 
     public static Function<List<String>, Vehicle> vehicleBuilder = cellValues ->
             new Vehicle(
