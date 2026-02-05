@@ -1,8 +1,5 @@
 package com.originspecs.dataprep;
 
-import com.originspecs.dataprep.model.Vehicle;
-import com.originspecs.dataprep.processor.DataProcessor;
-import com.originspecs.dataprep.processor.RecordBuilder;
 import com.originspecs.dataprep.processor.RowParser;
 import com.originspecs.dataprep.reader.FileReader;
 import com.originspecs.dataprep.writer.JsonFileWriter;

@@ -5,6 +5,7 @@
 *.war
 *.ear
 *.nar
+*.csv
 hs_err_pid*
 
 target/
