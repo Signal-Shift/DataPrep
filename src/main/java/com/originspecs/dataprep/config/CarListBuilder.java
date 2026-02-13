@@ -1,4 +1,4 @@
-package com.originspecs.dataprep.reader;
+package com.originspecs.dataprep.config;
 
 import com.originspecs.dataprep.model.CarBrand;
 import lombok.extern.slf4j.Slf4j;

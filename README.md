@@ -2,7 +2,14 @@
 
 A lightweight Java CLI tool that performs pre-processing on XLS files to match the desried output structure.
 Normalizing messy data/columns mismatch in order to create structured JSON after this data is fed to the [spec-extractor](https://github.com/DylanBrennan92/spec-extractor)
-application. Output of DataPrep is normalised XLS files.
+application.
+
+### Input
+Raw .XLS files in original language
+
+### Output
+Pre-processed .XLS files in original language with required columns and fields only
+
 ## Technology Stack
 
 - Java 21 - Modern Java with records, sealed interfaces, and pattern matching
@@ -25,25 +32,24 @@ mvn clean package
 
 ### CLI Arguments
 
-| Argument | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `recordType` | Yes | Record type to extract: `VEHICLE` | `VEHICLE` |
-| `inputFile.xls` | Yes | Path to the Excel (.xls) file to process | `nissan.xls`, `staff.xls` |
-| `outputFile.json` | Yes | Path where the JSON output should be saved | `output-nissan.json`|
-| `requiredCells` | Yes | Minimum number of filled cells for a row to be kept | `20`, `7` |
+| Argument          | Required | Description                                                        | Example |
+|-------------------|----------|--------------------------------------------------------------------|---------|
+| `inputFile.xls`   | Yes | Path to the Excel (.xls) file to process                           | `nissan.xls`, `staff.xls` |
+| `outputFile.xls`  | Yes | Path where the .xls output should be saved                         | `output-nissan.json`|
 | `columnThreshold` | No | Minimum fill ratio (0.0–1.0) to keep a column; default `0.1` (10%) | `0.01`, `0.05` |
 
 **Usage:**  
-`java -jar DataPrep.jar <recordType> <inputFile.xls> <outputFile.json> <requiredCells> [columnThreshold]`
+`java -jar DataPrep.jar <recordType> <inputFile.xls> <outputFile.xls> <requiredCells> [columnThreshold]`
 
 ## Example usage
 
 ```bash
 # Vehicle specs (e.g. Nissan spreadsheet) — 20 required cells, 1% column threshold
-java -jar target/DataPrep-1.0-SNAPSHOT-jar-with-dependencies.jar VEHICLE src/main/resources/nissan.xls output-nissan.json 20 0.01
+
+java -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.json 0.01
 
 # With DEBUG logging
-java -DLOG_LEVEL=DEBUG -jar target/DataPrep VEHICLE src/main/resources/nissan.xls output-nissan.json 20 0.01
+java -DLOG_LEVEL=DEBUG -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.json 0.01
 ```
 
 ## Logging options
