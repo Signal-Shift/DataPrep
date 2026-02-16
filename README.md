@@ -26,10 +26,15 @@ Pre-processed .XLS files in original language with required columns and fields o
 
 ### Building from source
 
+```bash
 git clone https://github.com/DylanBrennan92/DataPrep
+```
+```bash
 cd DataPrep
+```
+```bash
 mvn clean package
-
+```
 ### CLI Arguments
 
 | Argument          | Required | Description                                                        | Example |
@@ -38,31 +43,15 @@ mvn clean package
 | `outputFile.xls`  | Yes | Path where the .xls output should be saved                         | `output-nissan.json`|
 | `columnThreshold` | No | Minimum fill ratio (0.0–1.0) to keep a column; default `0.1` (10%) | `0.01`, `0.05` |
 
-**Usage:**  
-`java -jar DataPrep.jar <recordType> <inputFile.xls> <outputFile.xls> <requiredCells> [columnThreshold]`
+**Usage Format**  
+`java -jar DataPrep.jar <inputFile.xls> <outputFile.xls> [columnThreshold]`
 
 ## Example usage
 
 ```bash
-# Vehicle specs (e.g. Nissan spreadsheet) — 20 required cells, 1% column threshold
-
-java -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.json 0.01
-
-# With DEBUG logging
-java -DLOG_LEVEL=DEBUG -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.json 0.01
+java -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.xls 0.01
 ```
-
-## Logging options
-
-Set the `LOG_LEVEL` system property to control verbosity:
-
+### With DEBUG logging
 ```bash
-# INFO (default — progress and results)
-java -jar target/DataPrep-*.jar VEHICLE input.xls output.json 20
-
-# DEBUG (detailed processing)
-java -DLOG_LEVEL=DEBUG -jar target/DataPrep*.jar VEHICLE input.xls output.json 20 0.01
-
-# TRACE (maximum verbosity for troubleshooting)
-java -DLOG_LEVEL=TRACE -jar target/DataPrep*.jar VEHICLE input.xls output.json 20 0.01
+java -DLOG_LEVEL=DEBUG -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.xls 0.01
 ```

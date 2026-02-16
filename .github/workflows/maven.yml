@@ -1,17 +1,9 @@
 name: Java CI with Maven
 
 on:
-  push:
-    branches:
-      - main
-      - fix/*
-      - feat/*
-      - chore/*
-      - build/*
-      - docs/*
   pull_request:
     branches:
-      - "main"
+      - main
 
 jobs:
   build:
