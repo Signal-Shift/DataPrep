@@ -8,29 +8,29 @@ import java.nio.file.Path;
 public record Config(
         Path inputFile,
         Path outputFile,
-        int requiredCells
+        double columnThreshold
 ) {
     public static Config fromArgs(String[] args) {
         if (args.length != 3) {
-            throw new IllegalArgumentException("Exactly 3 arguments required: <inputFile> <outputFile> <requiredCells>");
+            throw new IllegalArgumentException("Exactly 3 arguments required: <inputFile> <outputFile> <columnThreshold>");
         }
 
         var inputFile = Path.of(args[0]);
         var outputFile = Path.of(args[1]);
-        var requiredCells = parseRequiredCells(args[2]);
+        var columnThreshold = parseColumnThreshold(args[2]);
 
-        return new Config(inputFile, outputFile, requiredCells);
+        return new Config(inputFile, outputFile, columnThreshold);
     }
 
-    private static int parseRequiredCells(String arg) {
+    private static double parseColumnThreshold(String arg) {
         try {
-            int cells = Integer.parseInt(arg);
-            if (cells <= 0) {
-                throw new IllegalArgumentException("Required cells must be positive: " + cells);
+            double value = Double.parseDouble(arg);
+            if (value < 0 || value > 1) {
+                throw new IllegalArgumentException("columnThreshold must be between 0.0 and 1.0, got: " + value);
             }
-            return cells;
+            return value;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Required cells must be an integer: " + arg);
+            throw new IllegalArgumentException("columnThreshold must be a number between 0.0 and 1.0: " + arg);
         }
     }
 
