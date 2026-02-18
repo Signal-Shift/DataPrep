@@ -6,8 +6,12 @@ import org.apache.poi.ss.usermodel.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Processes POI Sheet objects to remove empty columns based on fill threshold.
+ * This class works with Apache POI Sheet objects directly.
+ */
 @Slf4j
-public class PreProcessor {
+public class Processor {
 
     /**
      * Removes empty columns from a sheet in memory, skipping header rows
@@ -16,6 +20,8 @@ public class PreProcessor {
      * @param headerRows Number of header rows to skip in analysis
      * @return List of column indices that were kept
      */
+
+
     public List<Integer> removeEmptyColumnsFromSheet(Sheet sheet, double threshold, int headerRows) {
         DataFormatter formatter = new DataFormatter();
         int lastColumn = findLastColumn(sheet);
@@ -67,9 +73,6 @@ public class PreProcessor {
         return columnsToKeep;
     }
 
-    /**
-     * Overloaded method with default 3 header rows (based on your file structure)
-     */
     public List<Integer> removeEmptyColumnsFromSheet(Sheet sheet, double threshold) {
         // Default to 3 header rows based on your file structure
         return removeEmptyColumnsFromSheet(sheet, threshold, 3);
@@ -86,31 +89,4 @@ public class PreProcessor {
         return lastColumn;
     }
 
-    /**
-     * Quick method to detect how many header rows a sheet has
-     */
-    public int detectHeaderRows(Sheet sheet) {
-        DataFormatter formatter = new DataFormatter();
-
-        // Look for the row that contains "Vehicle name" in first column
-        for (int rowIndex = 0; rowIndex <= Math.min(10, sheet.getLastRowNum()); rowIndex++) {
-            Row row = sheet.getRow(rowIndex);
-            if (row != null) {
-                Cell cell = row.getCell(0, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                if (cell != null) {
-                    String value = formatter.formatCellValue(cell).trim();
-                    if (value.equalsIgnoreCase("Vehicle name") ||
-                            value.equalsIgnoreCase("Vehicle") ||
-                            value.contains("name")) {
-                        log.info("Detected header row at index {}", rowIndex);
-                        return rowIndex;
-                    }
-                }
-            }
-        }
-
-        // Default to 3 if not found
-        log.info("Header row not detected, defaulting to 3");
-        return 3;
-    }
 }
