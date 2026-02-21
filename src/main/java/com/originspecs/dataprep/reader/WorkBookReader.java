@@ -116,7 +116,7 @@ public class WorkBookReader {
                 continue;
             }
 
-            rows.add(new RowData(readRow(row, evaluator)));
+            rows.add(new RowData(readRow(row, evaluator, mergedCellValues)));
         }
 
         worksheetData.setRawHeaderRows(rawHeaderRows);
@@ -152,15 +152,23 @@ public class WorkBookReader {
     }
 
     /**
-     * Reads a plain data row, evaluating any formula cells to their computed value.
-     * Falls back to an empty string if evaluation fails for a particular cell.
+     * Reads a data row, evaluating formula cells to their computed value and
+     * propagating merged-region values to non-origin cells. This ensures that
+     * group-identifier columns (e.g. Car Name, Common Name) which use vertical
+     * merges in the source file are filled for every row in the merged region,
+     * not just the top cell.
      */
-    private List<String> readRow(Row row, FormulaEvaluator evaluator) {
+    private List<String> readRow(Row row, FormulaEvaluator evaluator, Map<String, String> mergedCellValues) {
         int lastCellNum = row.getLastCellNum();
         List<String> cellValues = new ArrayList<>(Math.max(lastCellNum, 0));
         for (int i = 0; i < lastCellNum; i++) {
             Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            cellValues.add(cell == null ? "" : evaluateCell(cell, evaluator));
+            if (cell == null || formatter.formatCellValue(cell, evaluator).strip().isEmpty()) {
+                String cellKey = row.getRowNum() + ":" + i;
+                cellValues.add(mergedCellValues.getOrDefault(cellKey, ""));
+            } else {
+                cellValues.add(evaluateCell(cell, evaluator));
+            }
         }
         return cellValues;
     }
