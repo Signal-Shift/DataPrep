@@ -7,14 +7,35 @@ on:
 
 jobs:
   build:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    # Blocks the PR if any newly introduced dependency has a known CVE
+    permissions:
+      contents: read
+      pull-requests: write   # allows the action to post a PR comment with findings
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail the check if any dependency with a CVSS score >= 7 (High/Critical) is introduced
+          fail-on-severity: high
+          # Post a summary comment directly on the PR
+          comment-summary-in-pr: always
