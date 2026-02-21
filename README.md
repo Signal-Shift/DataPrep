@@ -11,6 +11,52 @@ The pipeline runs in four stages:
 3. **Write** — `WorkBookWriter` writes the cleaned workbook (one header row + data rows per sheet) to the output path.
 4. **Orchestrate** — `DataPrepOrchestrator` wires all three stages together; `Main` simply parses CLI args and calls it.
 
+### Pipeline Sequence Diagram
+
+> Mermaid source and draw.io import instructions: [`src/main/resources/diagrams/dataprep-pipeline.md`](src/main/resources/diagrams/dataprep-pipeline.md)
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Main
+    participant CliParser
+    participant DataPrepOrchestrator
+    participant WorkBookReader
+    participant HeaderRangeDetector
+    participant WorkBookProcessor
+    participant HeaderResolver
+    participant WorkBookWriter
+
+    User->>Main: java -jar dataprep.jar input.xls output.xls 0.01
+    Main->>CliParser: parseOrExit(args)
+    CliParser-->>Main: Config(inputFile, outputFile, columnThreshold)
+    Main->>DataPrepOrchestrator: run(config)
+    Note over DataPrepOrchestrator: Loads permittedHeaders.csv (JP→EN mapping)<br/>Loads autoList.csv (brand name list)
+    DataPrepOrchestrator->>WorkBookReader: read(inputFile)
+    loop For each worksheet in workbook
+        WorkBookReader->>HeaderRangeDetector: detect(sheet, brandNames)
+        Note over HeaderRangeDetector: Anchors on 車名 row<br/>Scans back for pre-headers<br/>Scans forward for first brand row
+        HeaderRangeDetector-->>WorkBookReader: HeaderRange(startRow, endRow)
+        WorkBookReader-->>WorkBookReader: extractRawHeaderRows(headerRange)
+        WorkBookReader-->>WorkBookReader: extractDataRows(dataStartRow)
+    end
+    WorkBookReader-->>DataPrepOrchestrator: WorkBookData
+    DataPrepOrchestrator->>WorkBookProcessor: process(workBookData, columnThreshold)
+    loop For each worksheet
+        WorkBookProcessor-->>WorkBookProcessor: determineColumnsToKeep(threshold)
+        WorkBookProcessor->>HeaderResolver: resolve(rawHeaderRows, columnsToKeep)
+        Note over HeaderResolver: Scans bottom-to-top per column<br/>Normalises newlines, matches permittedHeaders<br/>Falls back to bottom-most non-empty value
+        HeaderResolver-->>WorkBookProcessor: resolvedHeaders[]
+        WorkBookProcessor-->>WorkBookProcessor: resolveDuplicates() — fill-rate comparison
+        WorkBookProcessor-->>WorkBookProcessor: fillDownGroupColumns() — Car Name & Common Name
+    end
+    WorkBookProcessor-->>DataPrepOrchestrator: WorkBookData (processed)
+    DataPrepOrchestrator->>WorkBookWriter: write(workBookData, outputPath)
+    WorkBookWriter-->>DataPrepOrchestrator: output file written
+    DataPrepOrchestrator-->>Main: done
+    Main-->>User: Exit 0
+```
+
 ## Project Structure
 
 ```
@@ -23,6 +69,8 @@ DataPrep/
 │   ├── reader/          # WorkBookReader, HeaderRangeDetector, HeaderRange
 │   └── writer/          # WorkBookWriter
 └── src/main/resources/
+    ├── diagrams/
+    │   └── dataprep-pipeline.md   # Mermaid sequence diagram + draw.io import guide
     ├── local-data/
     │   ├── *.xls                  # Input files (not committed)
     │   ├── output/                # Generated output files (git-ignored)
