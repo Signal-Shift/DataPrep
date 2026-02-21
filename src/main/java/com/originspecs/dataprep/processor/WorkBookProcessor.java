@@ -90,13 +90,18 @@ public class WorkBookProcessor {
         resolveDuplicates(namedHeaders, namedColumns, sheet.getRows(), sheet.getName(),
                 finalHeaders, finalColumns);
 
+        // Step 6: fill down Car Name and Common Name so every data row is fully labelled.
+        //         Car Name fills to all data rows; Common Name fills until the next distinct value.
+        List<RowData> filteredRows = filterRows(sheet.getRows(), finalColumns);
+        List<RowData> filledRows = fillDownGroupColumns(finalHeaders, filteredRows, sheet.getName());
+
         WorkSheetData processed = new WorkSheetData();
         processed.setName(sheet.getName());
         processed.setIndex(sheet.getIndex());
         processed.setOriginalRowCount(sheet.getOriginalRowCount());
         processed.setOriginalColumnCount(sheet.getOriginalColumnCount());
         processed.setHeaders(finalHeaders);
-        processed.setRows(filterRows(sheet.getRows(), finalColumns));
+        processed.setRows(filledRows);
 
         log.info("Sheet '{}': {} columns → headers: {}",
                 sheet.getName(), finalHeaders.size(), finalHeaders);
@@ -184,8 +189,124 @@ public class WorkBookProcessor {
         }
     }
 
+    /**
+     * Minimum number of non-empty cells a row must have to be considered a
+     * "data row" for fill-rate comparison purposes. Rows below this threshold
+     * are treated as footnote, blank, or annotation rows and excluded from the
+     * fill-rate calculation used during duplicate header resolution.
+     *
+     * <p>Car-specification rows typically contain 7–10+ fields (model type,
+     * engine, weight, fuel economy…). Footnote rows contain 1–3 cells of free
+     * text. A threshold of 4 reliably separates the two.
+     */
+    private static final int DATA_ROW_MIN_CELLS = 4;
+
+    /**
+     * Calculates the fill rate for {@code colIndex} considering only rows
+     * that look like real data rows (have at least {@value DATA_ROW_MIN_CELLS}
+     * non-empty cells). This prevents trailing footnote/annotation rows from
+     * inflating the fill rate of certain columns and causing the wrong column
+     * to be selected as the "winner" during duplicate header resolution.
+     *
+     * <p>Falls back to the overall fill rate if no data rows are found.
+     */
     private double fillRate(List<RowData> rows, int colIndex, int totalRows) {
-        return totalRows == 0 ? 0 : (double) countNonEmptyCells(rows, colIndex) / totalRows;
+        if (totalRows == 0) return 0;
+
+        List<RowData> dataRows = rows.stream()
+                .filter(row -> nonEmptyCellCount(row) >= DATA_ROW_MIN_CELLS)
+                .toList();
+
+        if (dataRows.isEmpty()) {
+            return (double) countNonEmptyCells(rows, colIndex) / totalRows;
+        }
+
+        long nonEmptyInDataRows = dataRows.stream()
+                .filter(row -> !row.getCell(colIndex).trim().isEmpty())
+                .count();
+
+        return (double) nonEmptyInDataRows / dataRows.size();
+    }
+
+    private int nonEmptyCellCount(RowData row) {
+        int count = 0;
+        for (String cell : row.getCellValues()) {
+            if (!cell.trim().isEmpty()) count++;
+        }
+        return count;
+    }
+
+    /**
+     * Fills down the Car Name and Common Name columns so every data row carries
+     * an explicit value rather than relying on the "same as above" blank convention
+     * used in the source files.
+     *
+     * <p><b>Car Name</b> — the brand value (e.g. スバル) is propagated to every
+     * valid data row in the sheet. There is typically only one brand per sheet.
+     *
+     * <p><b>Common Name</b> — the model name (e.g. フォレスター) is propagated
+     * downward row by row, resetting whenever a new non-empty model name is
+     * encountered. This ensures every variant row within a model group is labelled.
+     *
+     * <p>Fill stops at the last valid data row (determined by
+     * {@link #DATA_ROW_MIN_CELLS}), so trailing footnote / annotation rows are
+     * not touched.
+     */
+    private List<RowData> fillDownGroupColumns(List<String> headers, List<RowData> rows, String sheetName) {
+        int carNameIdx   = headers.indexOf(Constants.CAR_NAME_EN);
+        int commonNameIdx = headers.indexOf(Constants.COMMON_NAME_EN);
+
+        if (carNameIdx < 0 && commonNameIdx < 0) return rows;
+
+        int lastDataRow = findLastDataRowIndex(rows);
+
+        String lastCarName    = "";
+        String lastCommonName = "";
+        List<RowData> result  = new ArrayList<>(rows.size());
+
+        for (int i = 0; i < rows.size(); i++) {
+            RowData row = rows.get(i);
+            boolean isDataRow = i <= lastDataRow;
+            List<String> cells = new ArrayList<>(row.getCellValues());
+
+            if (carNameIdx >= 0 && carNameIdx < cells.size()) {
+                String val = cells.get(carNameIdx).trim();
+                if (!val.isEmpty()) {
+                    lastCarName = val;
+                } else if (isDataRow && !lastCarName.isEmpty()) {
+                    cells.set(carNameIdx, lastCarName);
+                }
+            }
+
+            if (commonNameIdx >= 0 && commonNameIdx < cells.size()) {
+                String val = cells.get(commonNameIdx).trim();
+                if (!val.isEmpty()) {
+                    lastCommonName = val;
+                } else if (isDataRow && !lastCommonName.isEmpty()) {
+                    cells.set(commonNameIdx, lastCommonName);
+                }
+            }
+
+            result.add(new RowData(cells));
+        }
+
+        log.debug("Sheet '{}': fill-down applied to Car Name (col {}) and Common Name (col {}) through row {}",
+                sheetName, carNameIdx, commonNameIdx, lastDataRow);
+        return result;
+    }
+
+    /**
+     * Returns the index of the last row that has at least {@value DATA_ROW_MIN_CELLS}
+     * non-empty cells. Rows beyond this index are treated as footnote / annotation
+     * content and are excluded from fill-down propagation.
+     */
+    private int findLastDataRowIndex(List<RowData> rows) {
+        for (int i = rows.size() - 1; i >= 0; i--) {
+            if (nonEmptyCellCount(rows.get(i)) >= DATA_ROW_MIN_CELLS) {
+                return i;
+            }
+        }
+        return rows.size() - 1;
     }
 
     private List<Integer> determineColumnsToKeep(WorkSheetData sheet, double threshold, int protectedColIndex) {
