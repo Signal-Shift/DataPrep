@@ -49,9 +49,9 @@ mvn clean package
 ## Example usage
 
 ```bash
-java -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.xls 0.01
+java -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan_en.xls output-nissan.xls 0.01
 ```
 ### With DEBUG logging
 ```bash
-java -DLOG_LEVEL=DEBUG -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan.xls output-nissan.xls 0.01
+java -DLOG_LEVEL=DEBUG -jar target/dataprep-1.0-SNAPSHOT-jar-with-dependencies.jar src/main/resources/nissan_en.xls output-nissan.xls 0.01
 ```

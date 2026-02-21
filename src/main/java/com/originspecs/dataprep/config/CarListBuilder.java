@@ -15,7 +15,7 @@ public class CarListBuilder {
 
     public static List<CarBrand> populateBrandList(String fileName) {
 
-        Path path = Path.of("autoList.csv");
+        Path path = Path.of(fileName);
 
         try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
             return lines
