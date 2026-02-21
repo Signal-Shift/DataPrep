@@ -25,7 +25,7 @@ public record Config(
     private static double parseColumnThreshold(String arg) {
         try {
             double value = Double.parseDouble(arg);
-            if (value < 0 || value > 1) {
+            if (Double.isNaN(value) || Double.isInfinite(value) || value < 0 || value > 1) {
                 throw new IllegalArgumentException("columnThreshold must be between 0.0 and 1.0, got: " + value);
             }
             return value;
